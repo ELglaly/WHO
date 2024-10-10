@@ -1,0 +1,21 @@
+Guidelines & Notes for Team Members
+1. Naming Conventions
+•	Variable Names:
+o	Use descriptive names for variables like (total_expenditure instead of x or y).
+o	Use snake_case for variables (Life expectancy ).
+•	Function Names:
+o	Use descriptive names for function (totalAdultMortality).
+o	Use camelCase for function names (totalAdultMortality).
+2. Functions
+•	Function Definition:
+o	Break the code into smaller functions if possible to avoid repetition.
+o	Each function should perform one task.
+•	Arguments and Returns:
+o	functions should have clear arguments and return values that align with their purpose.
+3. Commenting
+o	Use comments to explain the logic of any non-trivial code (loops and conditionals in particular).
+o	Add comments for each function to describe what it does, its input parameters, and what it returns.
+Code Sharing:
+o	Use GitHub for version control to share code updates.
+o	Use Notion for task alignment and Project Management.
+o	If you and I are working on the same file, use branches to avoid merge conflicts.
