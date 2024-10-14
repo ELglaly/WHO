@@ -1,0 +1,357 @@
+---
+title: "WHO"
+author: "Sherif Ashraf" 
+output: html_document
+date: "2024-10-11"
+---
+
+Load the Data
+
+```{r WHO}
+WHO <- read.csv("Life Expectancy Data.csv")
+
+library(tidyverse)
+library(ggplot2)
+
+
+```
+```{r WHO}
+
+head(WHO)
+glimpse(WHO)
+names(WHO)
+
+
+```
+
+
+
+modify names of the columns to make easier for us to access them
+```{r WHO}
+# function to change the names of data fram to lowercase and "." to "_" so we can access it easily
+# like for gsub=> https://stackoverflow.com/questions/11776287/remove-pattern-from-string-with-gsub
+
+LowerAndDotReplace <- function(data_frame_pass){
+      # convert to lowercase
+      names(data_frame_pass) <- tolower(names(data_frame_pass))
+      # conver . with _ 
+      names(data_frame_pass) <- gsub("\\.", "_", names(data_frame_pass))
+
+  return(data_frame_pass)
+}
+
+
+# class the function
+
+WHO <- LowerAndDotReplace(WHO)
+names(WHO)
+
+
+```
+
+
+
+```{r WHO}
+
+class(WHO$country)
+
+# Convert country to  factor or category for easier analysis
+WHO$country <- as.factor(WHO$country)
+class(WHO$country)
+
+
+```
+
+
+
+under_five_deaths columns
+```{r WHO}
+
+class(WHO$under_five_deaths)
+unique(WHO$under_five_deaths)
+
+# Check for na values
+WHO %>%
+  filter(is.na(under_five_deaths)) %>%
+  count()
+
+summary(WHO$under_five_deaths)
+
+# Histogram
+hist(WHO$under_five_deaths, main="Histogram of Under-Five Deaths", xlab="Under-Five Deaths")
+
+
+
+```
+
+
+
+
+```{r WHO}
+class(WHO$polio)
+unique(WHO$polio)
+
+
+summary(WHO$polio)
+
+# check na values
+WHO %>%
+  filter(is.na(polio)) %>%
+  count()
+
+# Remove rows with na values
+WHO <- WHO %>%
+  filter(!is.na(polio))
+
+# Histogram of Polio
+hist(WHO$polio, main="Histogram of Polio", xlab="Polio")
+
+
+```
+
+
+Total Expenditure :
+
+```{r WHO}
+# Count na values
+WHO %>%
+  filter(is.na(total_expenditure)) %>%
+  count()
+
+# delete rows with NA values
+WHO <- WHO %>%
+  filter(!is.na(total_expenditure))
+
+
+summary(WHO$total_expenditure)
+
+# Histogram
+hist(WHO$total_expenditure, main="Histogram of Total Expenditure", xlab="Total Expenditure")
+
+
+```
+
+
+diphtheria: 
+
+```{r WHO}
+# Count missing values
+WHO %>%
+  filter(is.na(diphtheria)) %>%
+  count()
+
+
+summary(WHO$diphtheria)
+
+# Histogram
+hist(WHO$diphtheria, main="Histogram of Diphtheria", xlab="Diphtheria")
+
+
+
+```
+
+
+
+```{r WHO}
+WHO <- read.csv("Life Expectancy Data.csv")
+
+library(tidyverse)
+
+head(WHO)
+
+
+```
+
+
+
+
+```{r WHO}
+# Count na values
+WHO %>%
+  filter(is.na(hiv_aids)) %>%
+  count()
+
+
+summary(WHO$hiv_aids)
+
+# Histogram
+ggplot(WHO, aes(x=hiv_aids)) +
+  geom_histogram(color="white") +
+  labs(title="Histogram of HIV_AIDS", x="HIV_AIDS", y="Frequency")
+
+
+
+```
+
+
+```{r WHO}
+# Count na values
+WHO %>%
+  filter(is.na(hiv_aids)) %>%
+  count()
+
+
+summary(WHO$hiv_aids)
+
+# Histogram
+ggplot(WHO, aes(x=hiv_aids)) +
+  geom_histogram(color="white") +
+  labs(title="Histogram of HIV_AIDS", x="HIV_AIDS", y="Frequency")
+
+
+
+```
+
+```{r WHO}
+# Count na values
+WHO %>%
+  filter(is.na(hiv_aids)) %>%
+  count()
+
+
+summary(WHO$hiv_aids)
+
+# Histogram
+ggplot(WHO, aes(x=hiv_aids)) +
+  geom_histogram(color="white") +
+  labs(title="Histogram of HIV_AIDS", x="HIV_AIDS", y="Frequency")
+
+
+
+```
+
+
+
+
+
+```{r WHO}
+# Count na values
+WHO %>%
+  filter(is.na(gdp)) %>%
+  count()
+
+# Remove rows with NA in GDP
+WHO <- WHO %>%
+  filter(!is.na(gdp))
+
+# Histogram of GDP
+ggplot(WHO, aes(x=gdp)) +
+  geom_histogram( color="white") +
+  labs(title="Histogram of GDP", x="GDP", y="Frequency")
+
+
+```
+
+
+
+
+
+
+```{r WHO}
+# Count na values
+WHO %>%
+  filter(is.na(hiv_aids)) %>%
+  count()
+
+
+summary(WHO$hiv_aids)
+
+# Histogram
+ggplot(WHO, aes(x=hiv_aids)) +
+  geom_histogram(color="white") +
+  labs(title="Histogram of HIV_AIDS", x="HIV_AIDS", y="Frequency")
+
+
+
+```
+
+
+
+
+population : 
+
+
+```{r WHO}
+# Count na values
+WHO %>%
+  filter(is.na(population)) %>%
+  count()
+
+# delete rows with NA values
+WHO <- WHO %>%
+  filter(!is.na(population))
+
+
+summary(WHO$population)
+
+# Histogram of Population
+ggplot(WHO, aes(x=population)) +
+  geom_histogram(color="white") +
+  labs(title="Histogram of Population", x="Population", y="Frequency")
+
+```
+
+```{r WHO}
+
+#names(WHO)
+# Count na values
+WHO %>%
+  filter(is.na(thinness__1_19_years)) %>%
+  count()
+
+# Remove rows with na
+WHO <- WHO %>%
+  filter(!is.na(thinness__1_19_years))
+
+
+hist(WHO$thinness__1_19_years, main="Histogram of Thinness (10-19 years)", xlab="Thinness (10-19 years)")
+
+```
+
+
+
+```{r WHO}
+# Count na values
+WHO %>%
+  filter(is.na(income_composition_of_resources)) %>%
+  count()
+
+# delete rows with na
+WHO <- WHO %>%
+  filter(!is.na(income_composition_of_resources))
+
+# Histogram of Income Composition of Resources
+ggplot(WHO, aes(x=income_composition_of_resources)) +
+  geom_histogram( color="white") +
+  labs(title="Histogram of Income Composition of Resources", x="Income Composition of Resources", y="Frequency")
+
+```
+
+
+
+
+```{r WHO}
+# Count missing values
+WHO %>%
+  filter(is.na(schooling)) %>%
+  count()
+
+# Summary statistics
+summary(WHO$schooling)
+
+
+ggplot(WHO, aes(x=schooling)) +
+  geom_histogram(color="white") +
+  labs(title="Histogram of Schooling", x="Schooling", y="Frequency")
+
+```
+
+
+
+
+
+
+
+
+
+
