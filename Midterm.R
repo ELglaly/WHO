@@ -2,8 +2,6 @@
 
 # Possible Research Questions:
 # Is there a relationship between country status and life expectancy?
-# Is there a relationship between healthcare expenditure and life expectancy?*****
-# Do different regions exhibit varying patterns in life expectancy trends?
 # Does Hepatitis B rate or Measles affect life expectancy trends in a certain country more or less?
 library(tidyverse)
 
@@ -128,4 +126,34 @@ summary(WHO$BMI)
 class(WHO$BMI)
 hist(WHO$BMI, main="Histogram of BMI", xlab="Average Body Mass Index of entire population")
 
+###What is the relationship between the number of years in schooling and GDP per capita?
+schooling_gdp <- na.omit(WHO[, c("Schooling", "GDP")])
+model <- lm(GDP ~ Schooling, data = schooling_gdp)
+summary(model)
+ggplot(schooling_gdp, aes(x = Schooling, y = GDP)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  labs(title = "Relationship between Schooling and GDP per Capita",
+       x = "Number of Years in Schooling",
+       y = "GDP per Capita")
+#Slope (1882.4): This is the key coefficient that indicates the relationship between schooling and GDP. For every additional year of schooling, the GDP per capita is estimated to increase by about $1,882.4. This positive slope suggests a strong positive relationship between schooling and GDP.
+#P-value (< 2e-16): The p-value associated with both the intercept and the schooling coefficient is extremely small (much less than 0.001), meaning that the relationship between years of schooling and GDP is statistically significant. The stars (***) also indicate high statistical significance.
+#The R-squared value indicates how well the independent variable (schooling) explains the variability in the dependent variable (GDP). Here, R-squared = 0.2009, meaning that approximately 20.09% of the variation in GDP is explained by the number of years of schooling. While 20% isn't a very high value, it suggests that schooling is an important but not the only factor affecting GDP.
 
+###Predicting life expectancy using immunization coverage among 1-year-olds (%) for Hepatitis B, Diphtheria, Polio
+diseases <- na.omit(WHO[, c("Life.expectancy", "Hepatitis.B", "Diphtheria", "Polio")])
+model2 <- lm(Life.expectancy ~ Hepatitis.B + Diphtheria + Polio, data = diseases)
+summary(model2)
+ggplot() +
+  geom_point(data = diseases, aes(x = Hepatitis.B, y = Life.expectancy), color = "blue", alpha = 0.6) +
+  geom_smooth(data = diseases, aes(x = Hepatitis.B, y = Life.expectancy), method = "lm", se = FALSE, color = "blue") +
+  geom_point(data = diseases, aes(x = Diphtheria, y = Life.expectancy), color = "green", alpha = 0.6) +
+  geom_smooth(data = diseases, aes(x = Diphtheria, y = Life.expectancy), method = "lm", se = FALSE, color = "green") +
+  geom_point(data = diseases, aes(x = Polio, y = Life.expectancy), color = "red", alpha = 0.6) +
+  geom_smooth(data = diseases, aes(x = Polio, y = Life.expectancy), method = "lm", se = FALSE, color = "red") +
+  labs(title = "Life Expectancy vs Immunization Coverage",
+       x = "Immunization Coverage (%)",
+       y = "Life Expectancy (Years)")
+
+#Diphtheria and Polio immunization have a significant positive effect on life expectancy, with both p-values being < 2e-16. This means we can confidently say that higher immunization coverage for Diphtheria and Polio is associated with an increase in life expectancy.
+#The R-squared value indicates that 16.49% of the variation in life expectancy can be explained by the immunization coverage for Hepatitis B, Diphtheria, and Polio.
