@@ -190,7 +190,7 @@ after trying to overfit the model the  R-squared increases to .17 which is not e
 
 
 
-What I can notice form the graph is the the resduals are not normally distributed
+What I can notice from the graph is the the resduals are not normally distributed
 
 
 
@@ -231,6 +231,7 @@ visualize_confidence_interval(life_expectancy_alcohol_model,
 
 ```{r }
 
+
 library(ggplot2)
 library(dplyr)
 library(MASS)
@@ -251,14 +252,26 @@ summary(gdp_schooling_model)
 
 4- Both the intercept and slope have big standard errors, especially **Intercept** which is 1111.9 , indicating the coefficient estimates are not precise.
 
-Residual standard error:
+#Residual standard error:
 1- The output shows that the Residual standard error is 10140  which is a significant number that indicates the spread of the residuals in the model.
 
 2- The output shows  that there are 1647 degrees of freedom, which means that the model has 1647 data points left after fitting the model.
 
-R-squared:
+#R-squared:
 The model's Multiple R-squared is 0.219, which means that the model only explains 21.9% of the variance in GDP which means that the model is not strong.
 
+#visualzing GDP vs schooling model    
+```{r }
+ 
+ visualize_linear_reggression(WHO$gdp,"GDP", WHO$schooling,"schooling")
 
+```
 
+# Visualizing residuals
+```{r }
+  #Predict GDP based on Schooling using the linear model and
+  #add it as a column in the data fram 
+  WHO$predicted_GDP <- predict(gdp_schooling_model)
+  visualize_residuals(WHO$gdp,"GDP",WHO$schooling,"Schooling",gdp_schooling_model)
+```
 
