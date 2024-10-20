@@ -1,0 +1,200 @@
+---
+title: "linearReqgression"
+author: "Sherif Shawashen"
+date: "2024-10-20"
+output: html_document
+---
+
+# functions
+
+```{r }
+ library(ggplot2)
+library(ggfortify)
+
+
+#visualize the residuals
+visualize_residuals <- function(dependent,dependent_name, independent,independent_name, data_model) {
+  
+  # Get predicted values
+  WHO$predicted <- predict(data_model)
+  
+  #
+  ggplot(WHO, aes(x = independent, y = dependent)) +
+    geom_point() +
+    geom_segment(aes (xend = independent, yend = predicted), color = "red") + 
+    geom_smooth(method = "lm", se = FALSE, color = "blue") +  
+    theme_minimal() + 
+    labs(title = paste("Visualizing Residuals: ", dependent_name, " vs ", independent_name),
+         x = independent_name,
+         y = dependent_name)
+}
+
+
+#visualize the linear reggression 
+visualize_linear_reggression <- function(dependent,dependent_name, independent,independent_name) {
+  
+  ggplot(WHO, aes(x = independent, y = dependent)) +
+    geom_point() +
+    geom_smooth(method = "lm", se = FALSE, color = "blue") +  
+    theme_minimal() + 
+    labs(title = paste("Visualizing linear reggression: ", dependent_name, " vs ", independent_name),
+         x = independent_name,
+         y = dependent_name)
+}
+
+
+visualize_confidence_interval <- function(function_model,dependent,dependent_name, independent,independent_name)
+{
+ 
+
+# create new data for predictions
+new_data <- data.frame(alcohol = seq(min(independent), max(independent), length.out = 200))
+
+CI_95 <- predict(function_model, newdata = new_data, interval = "confidence", level = 0.95)
+
+new_data$fit <- CI_95[, "fit"]
+new_data$up <- CI_95[, "upr"]
+new_data$down <- CI_95[, "lwr"]
+
+
+ggplot() +  
+  geom_smooth(method = "lm", se = FALSE, color = "blue") + 
+  geom_line(data = new_data, aes(x = alcohol, y = fit), color = "red") +  # Regression line
+  
+  geom_line(data = new_data, aes(x = alcohol, y = up), linetype = "dashed", size = 1, color = "green") + 
+  
+  geom_line(data = new_data, aes(x = alcohol, y = down), linetype = "dashed", size = 1, color = "green") +  
+  
+  theme_minimal() +
+  labs(title = paste("Linear Regression with 95% Confidence Interval for ",independent_name , " vs ",  dependent_name),
+       x = independent_name,
+       y = dependent_name)  
+
+
+}
+
+```
+
+
+# function to change the names of data fram to lowercase and "." to "_" so we can access it easily
+# link for gsub=> https://stackoverflow.com/questions/11776287/remove-pattern-from-string-with-gsub
+``` {r}
+
+
+WHO <- read.csv("Life Expectancy Data.csv")
+
+LowerAndDotReplace <- function(data_frame_pass){
+      # convert to lowercase
+      names(data_frame_pass) <- tolower(names(data_frame_pass))
+      # conver . with _ 
+      names(data_frame_pass) <- gsub("\\.", "_", names(data_frame_pass))
+
+  return(data_frame_pass)
+}
+
+WHO <-na.omit(WHO)
+# class the function
+
+WHO <- LowerAndDotReplace(WHO)
+names(WHO)
+
+```
+
+
+
+## What is the relationship between consumption of alcohol and life expectancy?
+
+```{r }
+
+library(ggplot2)
+library(dplyr)
+library(MASS)
+
+# Linear Model
+life_expectancy_alcohol_model <- lm(life_expectancy ~ alcohol, data=WHO)
+
+summary(life_expectancy_alcohol_model)
+
+```
+
+Expalin the output:- 
+
+# Coefficients:
+1- (Intercept): The model predicts that when the alcohol consumption is zero the, life expectancy is 64.76 years.
+
+2- alcohol: the model says that for each unit increase in alcohol consumption, life expectancy increases by 0.87925  years, holding all other factors are constant.
+
+3- p values : the models says that the p values for both Intercept and alcohol are less than 5% which indicats a realtionship between the alcohol consumption and life expectancy and we can reject null hypothesis.
+
+4- Both the intercept and slope have very small standard errors, indicating the coefficient estimates are precise.
+
+# Residual standard error:
+ 1- the model says that Residual standard error is 8.054 which is a big number that indicates the spread of the Residual in the model.
+ 2- the model says that the RES on 1647 degrees of freedom which means that the model has 1647 data point left after fitting the model
+ 
+ 
+# R-squared
+the model Multiple R-squared is 0.1622 which means that the model only explians 16% life expectancy so the model is not a good one.
+
+
+# trying to overfit the model using polynomial
+
+```{r }
+
+overfitmo_del <- lm(life_expectancy ~ poly(alcohol, 2), data=WHO)
+summary(overfitmo_del)
+
+
+```
+after trying to overfit the model the  R-squared increases to .17 which is not effecient as well.
+
+
+
+
+#visualzing alcohol consumption vs life expectancy model    
+```{r }
+ 
+ visualize_linear_reggression(WHO$life_expectancy,"life_expectancy", WHO$alcohol,"alcohol")
+
+```
+
+
+# Visualizing residuals
+```{r }
+  #Predict life expectancy based on alcohol consumption using the linear model and
+  #add it as a column in the data fram 
+  WHO$predicted_life <- predict(life_expectancy_alcohol_model)
+  visualize_residuals(WHO$life_expectancy,"life_expectancy",WHO$alcohol,"alcohol",life_expectancy_alcohol_model)
+```
+
+
+
+What I can notice form the graph is the the resduals are not normally distributed
+
+
+
+
+# confidence interval for the model
+```{r}
+confint(life_expectancy_alcohol_model)
+
+```
+
+1- we can see that confidence interval for **intercept** is between 64.7308102 and 65.9022146 which mena that 95% if of the Intercept lies in this range.
+2- the same for  confidence interval for **alcohol** whic is between 0.7826617 and  0.9758293 , meaning that 95% if of the alcohol lies in this range. 
+3- the confidence interval renge for booth **intercept**  and **alcohol** does not contain a zero which impies a that we can reject the null hypothesis and there is a statistically significant relationship between alcohol consumption and life expectancy.
+
+#visualzing confidence interval
+
+```{r}
+
+visualize_confidence_interval(life_expectancy_alcohol_model, 
+                              WHO$life_expectancy, 
+                              "life expectancy", 
+                              WHO$alcohol, 
+                              "alcohol consumption")
+
+
+```
+
+
