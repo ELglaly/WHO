@@ -1,0 +1,143 @@
+---
+title: "Mulit"
+author: "Sherif Shawashen"
+date: "2024-10-21"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## load the dataset and clean the data using omit 
+# function to change the names of data fram to lowercase and "." to "_" so we can access it easily
+# link for gsub=> https://stackoverflow.com/questions/11776287/remove-pattern-from-string-with-gsub
+
+```{r cars}
+WHO <- read.csv("Life Expectancy Data.csv")
+
+LowerAndDotReplace <- function(data_frame_pass){
+      # convert to lowercase
+      names(data_frame_pass) <- tolower(names(data_frame_pass))
+      # conver . with _ 
+      names(data_frame_pass) <- gsub("\\.", "_", names(data_frame_pass))
+
+  return(data_frame_pass)
+}
+
+WHO <-na.omit(WHO)
+
+WHO <- LowerAndDotReplace(WHO)
+
+class
+names(WHO)
+```
+
+##  Does the country’s GDP, Schooling, status or Total expenditure affect life expectancy?
+```{r}
+#check the class of the status column
+class(WHO$status)
+# check if there is other values rather than "Developing" "Developed" 
+unique(WHO$status)
+
+```
+
+
+```{r}
+
+multi_model_gdp_status <- lm(life_expectancy ~ gdp + status + schooling + total_expenditure , data = WHO)
+summary(multi_model_gdp_status)
+
+```
+# coefficients:
+
+1- (**Intercept**): The model predicts that when all variables GDP, schooling, and total expenditure are zero and statusis Developed (baseline) , life expectancy equals 45.67 years. and for **intercept** The p-value is less than 5% , which indicates that this estimate is statistically significant.
+
+2- GDP: The model shows that for each unit increase in GDP, life expectancy increases by 8.576e-05 years, holding all other factors constant and status is Developed (baseline). The  p-value less than 5% indicates a statistically significant relationship between GDP and life expectancy and we can reject null hypothesis.
+
+3- status (Developing) -1.465e+00 :  is This is the difference in the intercept between "Developed" and "Developing", holding all other variables GDP, schooling, and total expenditure zero. The p-value is 0.0041, which shows this estimate is statistically significant.
+
+schooling: The model shows that for each unit increase in schooling, life expectancy increases by 2.041e+00 years, holding all other factors constant and status = "Developed" . The v p-value (less than %5) indicates a statistically significant relationship between life expectency and Schooling.
+
+total_expenditure: The model Shows that for each unit increase in total expenditure, the life expectancy decreases by 5.722e-02 years. However, the p-value of 0.3857 higher than 5% which means  that this effect is not statistically significant we can not reject null hypothesis.
+
+#Residual standard error:
+1- Residual standard error is 5.942 This is a measure of the variability of the residuals, which means that the Residual are not spread out in the model
+2- Multiple R-squared: 0.5449 This means that the model explains 54.49% of the variance in life expectency, wich is not very high
+
+
+# Multicollinearity for the multi_model_gdp_status model
+
+```{r}
+
+
+# add status_numeric as anew cloumns becuase cor cunctio use only numerical data
+WHO$status_numeric <- ifelse(WHO$status == "Developed", 1, 0)
+class(WHO$status_numeric)
+
+cor( WHO[,c("gdp" ,"schooling" , "total_expenditure", "status_numeric")])
+
+# Model
+cor( WHO[,c("gdp", "total_expenditure", "status_numeric")])
+
+#cor.test(WHO$gdp,WHO$schooling)
+
+```
+1- Form the corelation matrix above we can see that GDP and schooling is corelated as cor estmite equals 0.4679470 so We will remove the of them but base on the cor estimate between total_expenditure and GDP is less than schooling and total_expenditure we will reomve schooling from the model.
+
+2-similartiy, for the status we can see that GDP and status is corelated as cor estmates equals 0.4848010 so we will reomve status_numericfrom the model
+
+#multi_model_gdp_status after removing corelated factors
+
+```{r}
+
+multi_model_gdp_status <- lm(life_expectancy ~ gdp + total_expenditure , data = WHO)
+summary(multi_model_gdp_status)
+```
+what we can see that the Multiple R-squared: 0.2041 which was 0.5449 before removing removing corelated factors which means that the model explains 20.41% of the variance in life expectency, wich is not very high.
+
+# Interactions Between  GDP and total_expenditure
+
+```{r}
+interaction_model_GDP_total_expenditure <- lm(WHO$life_expectancy ~ WHO$total_expenditure * WHO$gdp)
+summary(interaction_model_GDP_total_expenditure)
+
+```
+# coefficients:
+
+1- (**Intercept**): The model predicts that when all variables GDP, and total expenditure are zero  , life expectancy equals 6.435e+01 years. and for **intercept** The p-value is less than 5% , which indicates that this estimate is statistically significant.
+
+2- GDP: The model shows that for each unit increase in GDP, life expectancy increases by5.230e-01 years, holding all other factors constant. The  p-value less than 5% indicates a statistically significant relationship between GDP and life expectancy and we can reject null hypothesis.
+
+
+WHO$total_expenditure:WHO$gdp : The model shows that the effect of gdp on the life expectency changes by -1.795e-05 when total_expenditure increases by one unit. the p-values indictes that relationship between GDP and life expectancy  varies depending on the level of total expenditure.
+
+
+# Visualizing the Interaction
+```{r}
+
+ggplot(WHO, aes(x = gdp, y = life_expectancy, color = cut(total_expenditure, 5))) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE)
+```
+# Visualizing the Interaction based on the value of  total total_expenditure
+```{r}
+
+WHO$expenditure_group <- cut(WHO$total_expenditure, 5)
+
+ggplot(WHO, aes(x = gdp, y = life_expectancy, color = expenditure_group)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE)+
+  facet_wrap(~ expenditure_group)
+```
+
+
+# Visualizing the Interaction based on the stauts of the country and expenditure_group
+```{r}
+
+
+ggplot(WHO, aes(x = gdp, y = life_expectancy, color = expenditure_group)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  facet_wrap(~ status + expenditure_group)
+```
