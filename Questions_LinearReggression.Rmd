@@ -73,6 +73,27 @@ ggplot() +
 
 }
 
+
+# coefficient and their confidence interval 
+library(ggplot2)
+
+visualize_coefficient_CI <- function(function_model) {
+  # Create data frame for coefficients
+  df_coefficient <- as.data.frame(confint(function_model))
+  df_coefficient$coefficient <- rownames(df_coefficient)  # Corrected spelling
+  df_coefficient$estimate <- coef(function_model)
+  
+  # Plotting
+  ggplot(df_coefficient, aes(x = coefficient, y = estimate)) +  # Corrected aes mapping
+    geom_point(size = 3) +
+    geom_errorbar(aes(ymin = `2.5 %`, ymax = `97.5 %`), width = 0.2) +
+    labs(title = "Coefficients and Their Confidence Intervals", 
+         x = "Coefficient", 
+         y = "Estimate") +  # Corrected spelling
+    theme_minimal() 
+}
+
+
 ```
 
 
@@ -102,7 +123,7 @@ names(WHO)
 
 
 
-## What is the relationship between consumption of alcohol and life expectancy?
+##  Question 1 : What is the relationship between consumption of alcohol and life expectancy?
 
 ```{r }
 
@@ -169,7 +190,7 @@ after trying to overfit the model the  R-squared increases to .17 which is not e
 
 
 
-What I can notice form the graph is the the resduals are not normally distributed
+What I can notice from the graph is the the resduals are not normally distributed
 
 
 
@@ -178,7 +199,14 @@ What I can notice form the graph is the the resduals are not normally distribute
 ```{r}
 confint(life_expectancy_alcohol_model)
 
+
+#visualzing confidence interval
+visualize_coefficient_CI(life_expectancy_alcohol_model)
+
 ```
+
+
+
 
 1- we can see that confidence interval for **intercept** is between 64.7308102 and 65.9022146 which mena that 95% if of the Intercept lies in this range.
 2- the same for  confidence interval for **alcohol** whic is between 0.7826617 and  0.9758293 , meaning that 95% if of the alcohol lies in this range. 
@@ -198,3 +226,81 @@ visualize_confidence_interval(life_expectancy_alcohol_model,
 ```
 
 
+
+# Question 2 : What is the relationship between the number of years in schooling and GDP per capita?
+
+```{r }
+
+
+library(ggplot2)
+library(dplyr)
+library(MASS)
+
+# Linear Model
+gdp_schooling_model <- lm(gdp ~ schooling, data=WHO)
+
+summary(gdp_schooling_model)
+
+```
+
+#coefficients:
+1- (Intercept): The model predicts that when schooling is zero the GDP is -17717.0 unit.
+
+2- schooling: The output shows  that for each unit increase in schooling, GDP increases by 1921.1 units, holding all other factors constant.
+
+3- p values: The output shows  that the p values for both the Intercept and schooling are less than 5%, which indicates a relationship between schooling and GDP, and we can reject the null hypothesis.
+
+4- Both the intercept and slope have big standard errors, especially **Intercept** which is 1111.9 , indicating the coefficient estimates are not precise.
+
+#Residual standard error:
+1- The output shows that the Residual standard error is 10140  which is a significant number that indicates the spread of the residuals in the model.
+
+2- The output shows  that there are 1647 degrees of freedom, which means that the model has 1647 data points left after fitting the model.
+
+#R-squared:
+The model's Multiple R-squared is 0.219, which means that the model only explains 21.9% of the variance in GDP which means that the model is not strong.
+
+#visualzing GDP vs schooling model    
+```{r }
+ 
+ visualize_linear_reggression(WHO$gdp,"GDP", WHO$schooling,"schooling")
+
+```
+
+# Visualizing residuals
+```{r }
+  #Predict GDP based on Schooling using the linear model and
+  #add it as a column in the data fram 
+  WHO$predicted_GDP <- predict(gdp_schooling_model)
+  visualize_residuals(WHO$gdp,"GDP",WHO$schooling,"Schooling",gdp_schooling_model)
+```
+
+# confidence interval for coefficient for the model
+```{r}
+confint(gdp_schooling_model)
+
+
+#visualzing confidence interval
+visualize_coefficient_CI(gdp_schooling_model)
+
+```
+
+1- We can see that the confidence interval for the **intercept** ranges from -19897.975 to -15536.084. This means that we can be 95% confident that the true value of the intercept lies within this range.
+
+Similarly, the confidence interval for schooling is between 1745.715 and 2096.409, indicating that we can be 95% confident that the true effect of schooling on GDP falls within this interval.
+
+Since the confidence intervals for both the intercept and schooling do not include zero, we can reject the null hypothesis. which suggests that there is a statistically significant relationship between schooling and GDP.
+
+
+
+#visualzing confidence interval for the linear Reqression
+
+```{r}
+
+visualize_confidence_interval(life_expectancy_alcohol_model, 
+                              WHO$GDP, 
+                              "GDP", 
+                              WHO$schooling, 
+                              "schooling")
+
+```
