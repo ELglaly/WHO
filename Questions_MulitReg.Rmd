@@ -141,3 +141,132 @@ ggplot(WHO, aes(x = gdp, y = life_expectancy, color = expenditure_group)) +
   geom_smooth(method = "lm", se = FALSE) +
   facet_wrap(~ status + expenditure_group)
 ```
+
+# confedence interval for for coefficient the multi_model_gdp_status Model
+
+```{r}
+
+ confint(multi_model_gdp_status)
+
+```
+
+1- We can see that the confidence interval for the **intercept** ranges from 6.420144e+01 6.630828e+01. This means that we can be 95% confident that the true value of the intercept lies within this range.
+
+2- Similarly, the confidence interval for gdp is between 2.910889e-04 3.583137e-04, indicating that we can be 95% confident that the true effect of gdp on life expectency falls within this interval.
+
+3- according to total_expenditure, the confidence interval for total_expenditure is between 2.083665e-01 5.438757e-01, indicating that we can be 95% confident that the true effect of total_expenditure on life expectency falls within this interval.
+
+Since the confidence intervals for both the intercept and GDP and total_expenditure do not include zero, we can reject the null hypothesis. which suggests that there is a statistically significant relationship between (gdp , total_expenditure) and life expectency.
+
+# visualizing confedence interval for for coefficient the multi_model_gdp_status Model
+
+
+```{r }
+
+visualize_coefficient_CI <- function(function_model) {
+  # Create data frame for coefficients
+  df_coefficient <- as.data.frame(confint(function_model))
+  df_coefficient$coefficient <- rownames(df_coefficient)
+  df_coefficient$estimate <- coef(function_model)
+
+  ggplot(df_coefficient, aes(x = coefficient, y = estimate)) +  
+    geom_point(size = 2) +
+    geom_errorbar(aes(ymin = `2.5 %`, ymax = `97.5 %`), width = 0.2) +
+    labs(title = "Coefficients and Their Confidence Intervals", 
+         x = "Coefficient", 
+         y = "Estimate")
+}
+visualize_coefficient_CI(multi_model_gdp_status)
+
+```
+
+# visualizing multi_model_gdp_status Model
+```{r}
+
+visualize_multiple_regression <- function(dependent_name, independent_vars, independent_names) {
+  
+  ggplot(WHO, aes_string(x = independent_vars, y = dependent_name)) +
+    geom_point() +
+    geom_smooth(method = "lm", se = FALSE, color = "blue") +
+    theme_minimal() +
+    labs(title = paste("Visualizing : ", dependent_name, " vs ", independent_names),
+         x = independent_names,
+         y = dependent_name)
+}
+
+# Example usage
+visualize_multiple_regression("life_expectancy", 
+                               "gdp + total_expenditure", 
+                               "GDP && Total Expenditure")
+     
+
+```
+# visualzing the residuals 
+
+```{r }
+library(ggplot2)
+
+# Function to visualize residuals
+visualize_residuals <- function(dependent_name, independent_vars, independent_names, data_model) {
+  
+  WHO$predicted <- predict(data_model)
+ 
+  # Plotting
+  ggplot(WHO, aes_string(x = independent_vars, y = dependent_name)) +
+    geom_point() +
+    geom_segment(aes_string(xend = independent_vars, yend = "predicted"), color = "red") + 
+    geom_smooth(method = "lm", se = FALSE, color = "blue")+  
+    theme_minimal() + 
+    labs(title = paste("Visualizing Residuals: ", dependent_name, " vs ", independent_names),
+         x = independent_names,
+         y = "Residuals")
+}
+
+visualize_residuals("life_expectancy",  "gdp + total_expenditure", "GDP per Capita && total Expenditure ",multi_model_gdp_status )
+
+
+
+```
+
+
+
+
+```{r }
+
+visualize_confidence_interval_multiple <- function(function_model, dependent_name, independent_vars, independent_names) {
+  
+  new_data <- data.frame(matrix(ncol = length(independent_vars), nrow = 200))
+  colnames(new_data) <- independent_vars
+  for (i in 1:length(independent_vars)) {
+    new_data[[independent_vars[i]]] <- seq(min(WHO[[independent_vars[i]]]), 
+                                             max(WHO[[independent_vars[i]]]), 
+                                             length.out = 200)
+
+  }
+  
+  # Predict with confidence intervals
+  CI_95 <- predict(function_model, newdata = new_data, interval = "confidence", level = 0.95)
+  
+  new_data$fit <- CI_95[, "fit"]
+  new_data$up <- CI_95[, "upr"]
+  new_data$down <- CI_95[, "lwr"]
+  
+   colnames_format= paste(independent_vars[1] ," + ",independent_vars[2])
+
+  
+  ggplot(new_data, aes_string(x = colnames_format  , y = "fit")) +  
+    geom_line(color = "red") + 
+    geom_ribbon(aes(ymin = down, ymax = up), alpha = 0.3, fill = "green") + 
+    theme_minimal() +
+    labs(title = paste("95% Confidence Interval for ", independent_names, " vs ", dependent_name),
+         x = independent_names,
+         y = dependent_name) 
+}
+
+visualize_confidence_interval_multiple(multi_model_gdp_status, "life_expectancy", 
+                                        c("gdp", "total_expenditure"), 
+                                        "GDP & total Expenditure ")
+
+```
+
+
