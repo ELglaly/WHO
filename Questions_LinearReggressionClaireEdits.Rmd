@@ -1,0 +1,343 @@
+---
+title: "linearReqgression"
+author: "Sherif Shawashen"
+date: "2024-10-20"
+output: html_document
+---
+
+# Functions
+
+```{r }
+ library(ggplot2)
+library(ggfortify)
+
+
+#Visualize the residuals
+visualize_residuals <- function(dependent,dependent_name, independent,independent_name, data_model) {
+  
+  # Get predicted values
+  WHO$predicted <- predict(data_model)
+  
+  #
+  ggplot(WHO, aes(x = independent, y = dependent)) +
+    geom_point() +
+    geom_segment(aes (xend = independent, yend = predicted), color = "red") + 
+    geom_smooth(method = "lm", se = FALSE, color = "blue") +  
+    theme_minimal() + 
+    labs(title = paste("Visualizing Residuals: ", dependent_name, " vs ", independent_name),
+         x = independent_name,
+         y = dependent_name)
+}
+
+
+#Visualize the linear regression 
+visualize_linear_regression <- function(dependent,dependent_name, independent,independent_name) {
+  
+  ggplot(WHO, aes(x = independent, y = dependent)) +
+    geom_point() +
+    geom_smooth(method = "lm", se = FALSE, color = "blue") +  
+    theme_minimal() + 
+    labs(title = paste("Visualizing linear regression: ", dependent_name, " vs ", independent_name),
+         x = independent_name,
+         y = dependent_name)
+}
+
+
+visualize_confidence_interval <- function(function_model,dependent,dependent_name, independent,independent_name)
+{
+ 
+
+# Create new data for predictions
+new_data <- data.frame(alcohol = seq(min(independent), max(independent), length.out = 200))
+
+CI_95 <- predict(function_model, newdata = new_data, interval = "confidence", level = 0.95)
+
+new_data$fit <- CI_95[, "fit"]
+new_data$up <- CI_95[, "upr"]
+new_data$down <- CI_95[, "lwr"]
+
+
+ggplot() +  
+  geom_smooth(method = "lm", se = FALSE, color = "blue") + 
+  geom_line(data = new_data, aes(x = alcohol, y = fit), color = "red") +  # Regression line
+  
+  geom_line(data = new_data, aes(x = alcohol, y = up), linetype = "dashed", size = 1, color = "green") + 
+  
+  geom_line(data = new_data, aes(x = alcohol, y = down), linetype = "dashed", size = 1, color = "green") +  
+  
+  theme_minimal() +
+  labs(title = paste("Linear Regression with 95% Confidence Interval for ",independent_name , " vs ",  dependent_name),
+       x = independent_name,
+       y = dependent_name)  
+
+
+}
+
+
+#Coefficient and their confidence interval 
+library(ggplot2)
+
+visualize_coefficient_CI <- function(function_model) {
+  # Create data frame for coefficients
+  df_coefficient <- as.data.frame(confint(function_model))
+  df_coefficient$coefficient <- rownames(df_coefficient)  # Corrected spelling
+  df_coefficient$estimate <- coef(function_model)
+  
+  # Plotting
+  ggplot(df_coefficient, aes(x = coefficient, y = estimate)) +  # Corrected aes mapping
+    geom_point(size = 3) +
+    geom_errorbar(aes(ymin = `2.5 %`, ymax = `97.5 %`), width = 0.2) +
+    labs(title = "Coefficients and Their Confidence Intervals", 
+         x = "Coefficient", 
+         y = "Estimate") +  # Corrected spelling
+    theme_minimal() 
+}
+
+
+```
+
+
+# function to change the names of data fram to lowercase and "." to "_" so we can access it easily
+# link for gsub=> https://stackoverflow.com/questions/11776287/remove-pattern-from-string-with-gsub
+``` {r}
+
+
+#WHO <- read.csv("Life Expectancy Data.csv")
+
+LowerAndDotReplace <- function(data_frame_pass){
+      # convert to lowercase
+      names(data_frame_pass) <- tolower(names(data_frame_pass))
+      # convert . with _ 
+      names(data_frame_pass) <- gsub("\\.", "_", names(data_frame_pass))
+
+  return(data_frame_pass)
+}
+
+WHO <-na.omit(WHO)
+# class the function
+
+WHO <- LowerAndDotReplace(WHO)
+names(WHO)
+
+```
+
+
+
+##  Question 1 : What is the relationship between consumption of alcohol and life expectancy?
+
+```{r }
+
+library(ggplot2)
+library(dplyr)
+library(MASS)
+
+# Linear Model
+life_expectancy_alcohol_model <- lm(life_expectancy ~ alcohol, data=WHO)
+
+summary(life_expectancy_alcohol_model)
+
+```
+
+Expalin the output:- 
+
+# Coefficients:
+1- (Intercept): The model predicts that when the alcohol consumption is zero, the life expectancy is 64.76 years.
+
+2- alcohol: the model says that for each unit increase in alcohol consumption, life expectancy increases by 0.87925 years, holding all other factors are constant.
+
+3- p values : the models says that the p values for both Intercept and alcohol are less than 5% which indicates a relationship between alcohol consumption and life expectancy and we can reject the null hypothesis.
+
+4- Both the intercept and slope have very small standard errors, indicating the coefficient estimates are precise.
+
+# Residual standard error:
+ 1- the model says that Residual standard error is 8.054 which is a big number that indicates the spread of the Residual in the model.
+ 2- the model says that the RES on 1647 degrees of freedom which means that the model has 1647 data point left after fitting the model
+ 
+ 
+# R-squared
+the model's Multiple R-squared is 0.1622 which means that the model only explains 16% life expectancy so the model is not a good one.
+
+
+# trying to overfit the model using polynomial
+
+```{r }
+
+overfitmo_del <- lm(life_expectancy ~ poly(alcohol, 2), data=WHO)
+summary(overfitmo_del)
+
+
+```
+after trying to overfit the model the  R-squared increases to .17 which is not efficient as well.
+
+
+
+
+#visualzing alcohol consumption vs life expectancy model    
+```{r }
+ 
+ visualize_linear_regression(WHO$life_expectancy,"life_expectancy", WHO$alcohol,"alcohol")
+
+```
+
+
+# Visualizing residuals
+```{r }
+  #Predict life expectancy based on alcohol consumption using the linear model and
+  #add it as a column in the data fram 
+  WHO$predicted_life <- predict(life_expectancy_alcohol_model)
+  visualize_residuals(WHO$life_expectancy,"life_expectancy",WHO$alcohol,"alcohol",life_expectancy_alcohol_model)
+```
+
+
+
+What I can notice from the graph is the the residuals are not normally distributed
+
+
+
+
+# confidence interval for the model
+```{r}
+confint(life_expectancy_alcohol_model)
+
+
+#visualizing confidence interval
+visualize_coefficient_CI(life_expectancy_alcohol_model)
+
+```
+
+
+
+
+1- ee can see that confidence interval for **intercept** is between 64.7308102 and 65.9022146 which means that 95% of the Intercept lies in this range.
+2- the same for  confidence interval for **alcohol** which is between 0.7826617 and  0.9758293, meaning that 95% of the alcohol consumption lies in this range. 
+3- the confidence interval range for both **intercept**  and **alcohol** does not contain a zero which implies that we can reject the null hypothesis and there is a statistically significant relationship between alcohol consumption and life expectancy.
+
+#visualzing confidence interval
+
+```{r}
+
+visualize_confidence_interval(life_expectancy_alcohol_model, 
+                              WHO$life_expectancy, 
+                              "life expectancy", 
+                              WHO$alcohol, 
+                              "alcohol consumption")
+
+
+```
+# model diagnostics
+
+```{r }
+#Q-Q plot
+qqnorm(resid(life_expectancy_alcohol_model), main = "Q-Q Plot for Normality of Residuals")
+qqline(resid(life_expectancy_alcohol_model), col = "red")
+#Residuals vs. Fitted
+plot(life_expectancy_alcohol_model, which=1)
+#Scale-Location
+plot(life_expectancy_alcohol_model, which=3)
+#Cook's Distance
+plot(life_expectancy_alcohol_model, which=4)
+```
+#Analysis of Model Diagnostics
+
+Q-Q plot: The Q-Q plot shows that the residuals follow the red line fairly closely, representing a normal distribution, which is an assumption of linear regression.
+Residuals vs. Fitted: The plot shows that the fitted values (predicted values of the dependent variable, in this case, life expectancy), are randomly scattered around 0, which means that the model shows homoscedasticity, the constant variance of residuals which is another assumption of linear regression.
+Scale-Location: The plot shows an almost horizontal line with equally spread points above and below it. This also indicates homoscedasticity.
+Cook's Distance: None of the observation numbers have a cook's distance of more than 1, so there are no significant observations in our data that is influencing the model. 
+
+# Question 2 : What is the relationship between the number of years in schooling and GDP per capita?
+
+```{r }
+
+
+library(ggplot2)
+library(dplyr)
+library(MASS)
+
+# Linear Model
+gdp_schooling_model <- lm(gdp ~ schooling, data=WHO)
+
+summary(gdp_schooling_model)
+
+```
+
+#coefficients:
+1- (Intercept): The model predicts that when schooling is zero the GDP is -17717.0 units.
+
+2- schooling: The output shows that for each unit increase in schooling, GDP increases by 1921.1 units, holding all other factors constant.
+
+3- p values: The output shows that the p values for both the Intercept and schooling are less than 5%, which indicates a relationship between schooling and GDP, and we can reject the null hypothesis.
+
+4- Both the intercept and slope have big standard errors, especially **Intercept** which is 1111.9 , indicating the coefficient estimates are not precise.
+
+#Residual standard error:
+1- The output shows that the Residual standard error is 10140 which is a significant number that indicates the spread of the residuals in the model.
+
+2- The output shows that there are 1647 degrees of freedom, which means that the model has 1647 data points left after fitting the model.
+
+#R-squared:
+The model's Multiple R-squared is 0.219, which means that the model only explains 21.9% of the variance in GDP which means that the model is not strong.
+
+#visualzing GDP vs schooling model    
+```{r }
+ 
+ visualize_linear_reggression(WHO$gdp,"GDP", WHO$schooling,"schooling")
+
+```
+
+# Visualizing residuals
+```{r }
+  #Predict GDP based on Schooling using the linear model and
+  #add it as a column in the data fram 
+  WHO$predicted_GDP <- predict(gdp_schooling_model)
+  visualize_residuals(WHO$gdp,"GDP",WHO$schooling,"Schooling",gdp_schooling_model)
+```
+
+# confidence interval for coefficient for the model
+```{r}
+confint(gdp_schooling_model)
+
+
+#visualizing confidence interval
+visualize_coefficient_CI(gdp_schooling_model)
+
+```
+
+1- We can see that the confidence interval for the **intercept** ranges from -19897.975 to -15536.084. This means that we can be 95% confident that the true value of the intercept lies within this range.
+
+Similarly, the confidence interval for schooling is between 1745.715 and 2096.409, indicating that we can be 95% confident that the true effect of schooling on GDP falls within this interval.
+
+Since the confidence intervals for both the intercept and schooling do not include zero, we can reject the null hypothesis. which suggests that there is a statistically significant relationship between schooling and GDP.
+
+
+
+#visualzing confidence interval for the linear Reqression
+
+```{r}
+
+visualize_confidence_interval(life_expectancy_alcohol_model, 
+                              WHO$GDP, 
+                              "GDP", 
+                              WHO$schooling, 
+                              "schooling")
+
+```
+
+# model diagnostics
+
+```{r }
+#Q-Q plot
+qqnorm(resid(gdp_schooling_model), main = "Q-Q Plot for Normality of Residuals")
+qqline(resid(gdp_schooling_model), col = "red")
+#Residuals vs. Fitted
+plot(gdp_schooling_model, which=1)
+#Scale-Location
+plot(gdp_schooling_model, which=3)
+#Cook's Distance
+plot(gdp_schooling_model, which=4)
+```
+#Analysis of Model Diagnostics
+
+Q-Q plot: In this Q-Q plot, the residuals deviate from the QQ line, indicating a violation of normality and does not meet the assumptions of linear regression.
+Residuals vs. Fitted: The model shows Heteroskedasticity, which refers to a situation where the variance of the residuals is unequal over a range of measured values. Since heteroskedasticity exists, GDP and schooling contain unequal variance, and the analysis results may be invalid. 
+Scale-Location: The residuals are not spread equally across the range of fitted values. The red line should be horizontal with the points equally spread around it, and this does not. This indicates heteroscedasticity, the residuals are not equally distributed across the range of fitted values. 
+Cook's Distance: None of the observation numbers have a cook's distance of more than 1, so there are no significant observations in our data that is influencing the model. 
