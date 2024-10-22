@@ -2,10 +2,10 @@ Guidelines & Notes for Team Members
 1. Naming Conventions
 •	Variable Names:
 o	Use descriptive names for variables like (total_expenditure instead of x or y).
-o	Use snake_case for variables (Life expectancy ).
+o	Use snake_case for variables (life_expectancy ).
 •	Function Names:
-o	Use descriptive names for function (totalAdultMortality).
-o	Use camelCase for function names (totalAdultMortality).
+o	Use descriptive names for function (total_adult_mortality).
+o	Use snake_case for function names (total_adult_mortality).
 2. Functions
 •	Function Definition:
 o	Break the code into smaller functions if possible to avoid repetition.
