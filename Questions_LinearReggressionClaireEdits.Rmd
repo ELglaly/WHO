@@ -12,17 +12,18 @@ output: html_document
 library(ggfortify)
 
 
-#Visualize the residuals
+# function to Visualize the residuals
 visualize_residuals <- function(dependent,dependent_name, independent,independent_name, data_model) {
   
-  # Get predicted values
+  # Get predicted values based on the linear model
   WHO$predicted <- predict(data_model)
   
   #
   ggplot(WHO, aes(x = independent, y = dependent)) +
     geom_point() +
+    # draw lines for residuals
     geom_segment(aes (xend = independent, yend = predicted), color = "red") + 
-    geom_smooth(method = "lm", se = FALSE, color = "blue") +  
+    geom_smooth(method = "lm", se = FALSE, color = "blue") +  # Add linear regression line
     theme_minimal() + 
     labs(title = paste("Visualizing Residuals: ", dependent_name, " vs ", independent_name),
          x = independent_name,
@@ -30,40 +31,42 @@ visualize_residuals <- function(dependent,dependent_name, independent,independen
 }
 
 
-#Visualize the linear regression 
+#Function to visualize the linear regression model
 visualize_linear_regression <- function(dependent,dependent_name, independent,independent_name) {
   
   ggplot(WHO, aes(x = independent, y = dependent)) +
-    geom_point() +
-    geom_smooth(method = "lm", se = FALSE, color = "blue") +  
+    geom_point() + #actual data points
+    geom_smooth(method = "lm", se = FALSE, color = "blue") +  # Add a linear regression line
     theme_minimal() + 
     labs(title = paste("Visualizing linear regression: ", dependent_name, " vs ", independent_name),
          x = independent_name,
          y = dependent_name)
 }
 
-
+# Function to visualize the confidence interval around the regression line
 visualize_confidence_interval <- function(function_model,dependent,dependent_name, independent,independent_name)
 {
  
 
-# Create new data for predictions
+# Create new data for predictions based on the independent variable
 new_data <- data.frame(alcohol = seq(min(independent), max(independent), length.out = 200))
 
+# predict the value with 95% confidence interval
 CI_95 <- predict(function_model, newdata = new_data, interval = "confidence", level = 0.95)
 
+# Add the predicted values and confidence intervals to the new_data
 new_data$fit <- CI_95[, "fit"]
 new_data$up <- CI_95[, "upr"]
 new_data$down <- CI_95[, "lwr"]
 
 
 ggplot() +  
-  geom_smooth(method = "lm", se = FALSE, color = "blue") + 
-  geom_line(data = new_data, aes(x = alcohol, y = fit), color = "red") +  # Regression line
+  geom_smooth(method = "lm", se = FALSE, color = "blue") + # Regression line
+  geom_line(data = new_data, aes(x = alcohol, y = fit), color = "red") +  # predicted values (regression line)
   
-  geom_line(data = new_data, aes(x = alcohol, y = up), linetype = "dashed", size = 1, color = "green") + 
+  geom_line(data = new_data, aes(x = alcohol, y = up), linetype = "dashed", size = 1, color = "green") + # upper bound of confidence interval
   
-  geom_line(data = new_data, aes(x = alcohol, y = down), linetype = "dashed", size = 1, color = "green") +  
+  geom_line(data = new_data, aes(x = alcohol, y = down), linetype = "dashed", size = 1, color = "green") +  # lower bound of confidence interval
   
   theme_minimal() +
   labs(title = paste("Linear Regression with 95% Confidence Interval for ",independent_name , " vs ",  dependent_name),
@@ -74,17 +77,19 @@ ggplot() +
 }
 
 
-#Coefficient and their confidence interval 
+# Function to visualize the coefficients and their confidence intervals
 library(ggplot2)
 
 visualize_coefficient_CI <- function(function_model) {
   # Create data frame for coefficients
   df_coefficient <- as.data.frame(confint(function_model))
-  df_coefficient$coefficient <- rownames(df_coefficient)  # Corrected spelling
+  
+  # Add coefficient names and estimates
+  df_coefficient$coefficient <- rownames(df_coefficient)  
   df_coefficient$estimate <- coef(function_model)
   
   # Plotting
-  ggplot(df_coefficient, aes(x = coefficient, y = estimate)) +  # Corrected aes mapping
+  ggplot(df_coefficient, aes(x = coefficient, y = estimate)) + # Map coefficient names and estimates
     geom_point(size = 3) +
     geom_errorbar(aes(ymin = `2.5 %`, ymax = `97.5 %`), width = 0.2) +
     labs(title = "Coefficients and Their Confidence Intervals", 
@@ -92,6 +97,24 @@ visualize_coefficient_CI <- function(function_model) {
          y = "Estimate") +  # Corrected spelling
     theme_minimal() 
 }
+
+
+
+# function to calculate cohens_d
+cohens_d <- function(x1, x2) {
+  
+  smaple_size1 <- length(x1) # smaple_size1 is the size of the first sample
+  smaple_size2 <- length(x2) # smaple_size2 is the size of the first sample
+  
+  #calculate the pooled standard deviation
+  pooled_sd <- sqrt(((smaple_size1 - 1) * var(x1) + (smaple_size2 - 1) * var(x2)) / (smaple_size1 + smaple_size2 - 2))
+  
+  #calculate Cohen's d
+  d <- (mean(x1) - mean(x2)) / pooled_sd
+  return(d)
+  
+}
+
 
 
 ```
@@ -104,6 +127,8 @@ visualize_coefficient_CI <- function(function_model) {
 
 #WHO <- read.csv("Life Expectancy Data.csv")
 
+
+# Function to replace column names with lowercase and replace dots (.) with underscores (_)
 LowerAndDotReplace <- function(data_frame_pass){
       # convert to lowercase
       names(data_frame_pass) <- tolower(names(data_frame_pass))
@@ -113,10 +138,12 @@ LowerAndDotReplace <- function(data_frame_pass){
   return(data_frame_pass)
 }
 
+# remove missing data
 WHO <-na.omit(WHO)
-# class the function
 
+#function to clean column names
 WHO <- LowerAndDotReplace(WHO)
+# Display the column names
 names(WHO)
 
 ```
@@ -131,9 +158,10 @@ library(ggplot2)
 library(dplyr)
 library(MASS)
 
-# Linear Model
+# create Linear Model
 life_expectancy_alcohol_model <- lm(life_expectancy ~ alcohol, data=WHO)
 
+# Display a summary of the linear model
 summary(life_expectancy_alcohol_model)
 
 ```
@@ -155,26 +183,14 @@ Expalin the output:-
  
  
 # R-squared
-the model's Multiple R-squared is 0.1622 which means that the model only explains 16% life expectancy so the model is not a good one.
-
-
-# trying to overfit the model using polynomial
-
-```{r }
-
-overfitmo_del <- lm(life_expectancy ~ poly(alcohol, 2), data=WHO)
-summary(overfitmo_del)
-
-
-```
-after trying to overfit the model the  R-squared increases to .17 which is not efficient as well.
-
+the model's Multiple R-squared is 0.1622 means that about 16.22% of the variation in life expectancy can be explained by alcohol consumption in the model which is not a good one and Multiple R-squared almost equals Adjusted R-squared as we have only one predictor.
 
 
 
 #visualzing alcohol consumption vs life expectancy model    
 ```{r }
  
+#call  visualize_linear_regression function
  visualize_linear_regression(WHO$life_expectancy,"life_expectancy", WHO$alcohol,"alcohol")
 
 ```
@@ -185,6 +201,8 @@ after trying to overfit the model the  R-squared increases to .17 which is not e
   #Predict life expectancy based on alcohol consumption using the linear model and
   #add it as a column in the data fram 
   WHO$predicted_life <- predict(life_expectancy_alcohol_model)
+
+  # call visualize_residuals function
   visualize_residuals(WHO$life_expectancy,"life_expectancy",WHO$alcohol,"alcohol",life_expectancy_alcohol_model)
 ```
 
@@ -197,10 +215,11 @@ What I can notice from the graph is the the residuals are not normally distribut
 
 # confidence interval for the model
 ```{r}
+
+# confidence intervals of the model coefficients
 confint(life_expectancy_alcohol_model)
 
-
-#visualizing confidence interval
+# Visualize the confidence intervals of the coefficients
 visualize_coefficient_CI(life_expectancy_alcohol_model)
 
 ```
@@ -208,7 +227,7 @@ visualize_coefficient_CI(life_expectancy_alcohol_model)
 
 
 
-1- ee can see that confidence interval for **intercept** is between 64.7308102 and 65.9022146 which means that 95% of the Intercept lies in this range.
+1- I can see that confidence interval for **intercept** is between 64.7308102 and 65.9022146 which means that 95% of the Intercept lies in this range.
 2- the same for  confidence interval for **alcohol** which is between 0.7826617 and  0.9758293, meaning that 95% of the alcohol consumption lies in this range. 
 3- the confidence interval range for both **intercept**  and **alcohol** does not contain a zero which implies that we can reject the null hypothesis and there is a statistically significant relationship between alcohol consumption and life expectancy.
 
@@ -216,6 +235,8 @@ visualize_coefficient_CI(life_expectancy_alcohol_model)
 
 ```{r}
 
+
+#call visualize_confidence_interval function 
 visualize_confidence_interval(life_expectancy_alcohol_model, 
                               WHO$life_expectancy, 
                               "life expectancy", 
@@ -224,6 +245,7 @@ visualize_confidence_interval(life_expectancy_alcohol_model,
 
 
 ```
+
 # model diagnostics
 
 ```{r }
@@ -244,6 +266,22 @@ Residuals vs. Fitted: The plot shows that the fitted values (predicted values of
 Scale-Location: The plot shows an almost horizontal line with equally spread points above and below it. This also indicates homoscedasticity.
 Cook's Distance: None of the observation numbers have a cook's distance of more than 1, so there are no significant observations in our data that is influencing the model. 
 
+
+
+#Effect Size
+
+```{r }
+
+d_value <- cohens_d (WHO$life_expectancy,WHO$alcohol) # calculate the cohens_d
+
+d_value  # Output the Cohen's d effect size
+
+```
+
+the value of Cohen’s d = 9.466768 which is very large indicating large distinct the two groups are in terms of their mean values, which suggests a very strong effect size.in other words, independent variable (alchohol) has a very large impact on the dependent variable (life expectancy).
+
+
+
 # Question 2 : What is the relationship between the number of years in schooling and GDP per capita?
 
 ```{r }
@@ -253,9 +291,11 @@ library(ggplot2)
 library(dplyr)
 library(MASS)
 
-# Linear Model
+#  create Linear Model
 gdp_schooling_model <- lm(gdp ~ schooling, data=WHO)
 
+
+# Display a summary of the linear model
 summary(gdp_schooling_model)
 
 ```
@@ -275,11 +315,12 @@ summary(gdp_schooling_model)
 2- The output shows that there are 1647 degrees of freedom, which means that the model has 1647 data points left after fitting the model.
 
 #R-squared:
-The model's Multiple R-squared is 0.219, which means that the model only explains 21.9% of the variance in GDP which means that the model is not strong.
+The model's Multiple R-squared is 0.219, which means that the model only explains 21.9% of the variance in GDP which means that the model is not strong. and Multiple R-squared almost equals Adjusted R-squared as we have only one predictor.
 
 #visualzing GDP vs schooling model    
 ```{r }
  
+ # call visualize_linear_reggression function 
  visualize_linear_reggression(WHO$gdp,"GDP", WHO$schooling,"schooling")
 
 ```
@@ -289,15 +330,19 @@ The model's Multiple R-squared is 0.219, which means that the model only explain
   #Predict GDP based on Schooling using the linear model and
   #add it as a column in the data fram 
   WHO$predicted_GDP <- predict(gdp_schooling_model)
+
+# call visualize_residuals function to visualize residuals
   visualize_residuals(WHO$gdp,"GDP",WHO$schooling,"Schooling",gdp_schooling_model)
 ```
 
 # confidence interval for coefficient for the model
 ```{r}
+
+# confidence intervals of the model coefficients
 confint(gdp_schooling_model)
 
 
-#visualizing confidence interval
+#confidence interval for coefficient for the model by calling visualize_coefficient_CI function
 visualize_coefficient_CI(gdp_schooling_model)
 
 ```
@@ -314,6 +359,8 @@ Since the confidence intervals for both the intercept and schooling do not inclu
 
 ```{r}
 
+
+#call visualize_confidence_interval function
 visualize_confidence_interval(life_expectancy_alcohol_model, 
                               WHO$GDP, 
                               "GDP", 
@@ -321,6 +368,8 @@ visualize_confidence_interval(life_expectancy_alcohol_model,
                               "schooling")
 
 ```
+
+
 
 # model diagnostics
 
@@ -334,6 +383,7 @@ plot(gdp_schooling_model, which=1)
 plot(gdp_schooling_model, which=3)
 #Cook's Distance
 plot(gdp_schooling_model, which=4)
+
 ```
 #Analysis of Model Diagnostics
 
@@ -341,3 +391,18 @@ Q-Q plot: In this Q-Q plot, the residuals deviate from the QQ line, indicating a
 Residuals vs. Fitted: The model shows Heteroskedasticity, which refers to a situation where the variance of the residuals is unequal over a range of measured values. Since heteroskedasticity exists, GDP and schooling contain unequal variance, and the analysis results may be invalid. 
 Scale-Location: The residuals are not spread equally across the range of fitted values. The red line should be horizontal with the points equally spread around it, and this does not. This indicates heteroscedasticity, the residuals are not equally distributed across the range of fitted values. 
 Cook's Distance: None of the observation numbers have a cook's distance of more than 1, so there are no significant observations in our data that is influencing the model. 
+
+
+
+#Effect Size
+
+```{r }
+
+#call  cohens_d function 
+d_value_gdp_schooling_model <- cohens_d( WHO$gdp,WHO$schooling) # calculate the cohens_d
+
+d_value_gdp_schooling_model  # Output the Cohen's d effect size
+
+```
+
+the value of Cohen’s d = 0.6844271 which is medium indicating moderate distinct the two groups are in terms of their mean values, which suggests a  medium effect size.in other words, independent variable (GDP) has a medium impact on the dependent variable (Schooling).
