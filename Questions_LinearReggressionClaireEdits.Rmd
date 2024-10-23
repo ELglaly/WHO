@@ -208,8 +208,7 @@ the model's Multiple R-squared is 0.1622 means that about 16.22% of the variatio
 
 
 
-What I can notice from the graph is the the residuals are not normally distributed
-
+What I can notice from the graph that there is few outliers with large residuals. These points can have a significant impact on the model's fit anad residuals are not normally distributed.
 
 
 
@@ -227,8 +226,13 @@ visualize_coefficient_CI(life_expectancy_alcohol_model)
 
 
 
-1- I can see that confidence interval for **intercept** is between 64.7308102 and 65.9022146 which means that 95% of the Intercept lies in this range.
-2- the same for  confidence interval for **alcohol** which is between 0.7826617 and  0.9758293, meaning that 95% of the alcohol consumption lies in this range. 
+
+
+
+1- I can see that confidence interval for **intercept** is between 64.7308102 and 65.9022146 which means that 95% of the Intercept lies in this range the Confidence Interval seems to be wide. This indicates that the intercept is not very precise estimated.
+
+2- Conversely, for  confidence interval for **alcohol** which is between 0.7826617 and  0.9758293, meaning that 95% of the alcohol consumption lies in this range the Confidence Interval seems to be tiny. This indicates that the alcohol is precise estimated . 
+
 3- the confidence interval range for both **intercept**  and **alcohol** does not contain a zero which implies that we can reject the null hypothesis and there is a statistically significant relationship between alcohol consumption and life expectancy.
 
 #visualzing confidence interval
@@ -245,6 +249,13 @@ visualize_confidence_interval(life_expectancy_alcohol_model,
 
 
 ```
+
+output :
+
+confidence interval is narrow at lower levels, it indicates a more precise estimate, however, the confidence interval appears to be quite wide at higher levels of alcohol consumption indicating a less precise estimate.
+
+
+
 
 # model diagnostics
 
@@ -327,6 +338,7 @@ The model's Multiple R-squared is 0.219, which means that the model only explain
 
 # Visualizing residuals
 ```{r }
+
   #Predict GDP based on Schooling using the linear model and
   #add it as a column in the data fram 
   WHO$predicted_GDP <- predict(gdp_schooling_model)
@@ -334,6 +346,10 @@ The model's Multiple R-squared is 0.219, which means that the model only explain
 # call visualize_residuals function to visualize residuals
   visualize_residuals(WHO$gdp,"GDP",WHO$schooling,"Schooling",gdp_schooling_model)
 ```
+
+
+it seems to be a few outliers with large residuals at higher levels and these points can have a significant impact on the model's fit ,however, the residuals seem to be more likely normaly distributed
+
 
 # confidence interval for coefficient for the model
 ```{r}
@@ -347,9 +363,9 @@ visualize_coefficient_CI(gdp_schooling_model)
 
 ```
 
-1- We can see that the confidence interval for the **intercept** ranges from -19897.975 to -15536.084. This means that we can be 95% confident that the true value of the intercept lies within this range.
+1- We can see that the confidence interval for the **intercept** ranges from -19897.975 to -15536.084. This means that we can be 95% confident that the true value of the intercept lies within this range and the Confidence Interval seems to be wide. This indicates that the intercept is not very precise estimated..
 
-Similarly, the confidence interval for schooling is between 1745.715 and 2096.409, indicating that we can be 95% confident that the true effect of schooling on GDP falls within this interval.
+in contrast, the confidence interval for schooling is between 1745.715 and 2096.409, indicating that we can be 95% confident that the true effect of schooling on GDP falls within this interval and the Confidence Interval are not wide. This indicates that the schooling is precise estimated..
 
 Since the confidence intervals for both the intercept and schooling do not include zero, we can reject the null hypothesis. which suggests that there is a statistically significant relationship between schooling and GDP.
 
@@ -368,6 +384,8 @@ visualize_confidence_interval(life_expectancy_alcohol_model,
                               "schooling")
 
 ```
+
+confidence interval is somewhat narrow at lower levels, however, the confidence interval appears to be wide at higher levels of schooling indicating a less precise estimate.
 
 
 
