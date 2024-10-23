@@ -187,6 +187,24 @@ the model's Multiple R-squared is 0.1622 means that about 16.22% of the variatio
 
 
 
+#Hypothesis Testing using a t-test
+
+```{r }
+#Null Hypothesis: There is no relationship between alcohol consumption and life expectancy.
+#Alternative Hypothesis: There is a relationship between alcohol consumption and life expectancy. 
+t.test(WHO$alcohol, WHO$life_expectancy)
+```
+
+#Explanation of hypothesis testing using a t-test
+
+t-value: -271.83: This is a very large negative t-value, indicating that the mean of the first group (alcohol consumption) is significantly lower than the mean of the second group (life expectancy). A negative t-value suggests that as alcohol consumption increases, life expectancy decreases.
+alternative hypothesis: The difference in means is not equal to 0, meaning that there is a difference in means and we can reject the null hypothesis.
+p-value: This very small p-value suggests strong evidence against the null hypothesis, indicating a significant difference between the means.This implies that there is a statistically significant difference between the means of alcohol consumption and life expectancy.
+95% confidence interval: This interval suggests that we are 95% confident that the true difference in means lies between these two values.Specifically, it indicates that the life expectancy is likely to be about 64.30 to 65.24 years lower when alcohol consumption is higher.
+
+Since our p-value is less than 0.05, we can reject the null hypothesis that there is no relationship between alcohol and life expectancy. Therefore, we have proved our alternative hypothesis, which is that there is a relationship between alcohol consumption and life expectancy.
+
+
 #visualzing alcohol consumption vs life expectancy model    
 ```{r }
  
@@ -327,6 +345,29 @@ summary(gdp_schooling_model)
 
 #R-squared:
 The model's Multiple R-squared is 0.219, which means that the model only explains 21.9% of the variance in GDP which means that the model is not strong. and Multiple R-squared almost equals Adjusted R-squared as we have only one predictor.
+
+
+#Hypothesis Testing using a t-test
+
+```{r }
+#Null Hypothesis: There is no relationship between GDP and schooling
+#Alternative Hypothesis: There is a relationship between GDP and schooling 
+t.test(WHO$gdp, WHO$schooling)
+
+```
+
+
+#Explanation of hypothesis testing using a t-test
+
+t-value: 19.653 — This is the test statistic indicating how many standard deviations the sample means are apart.
+df: The model has 1648 data points left after fitting the model.
+alternative hypothesis: The difference in means is not equal to 0, meaning that there is a difference in means and we can reject the null hypothesis.
+p-value: This very small p-value suggests strong evidence against the null hypothesis, indicating a significant difference between the means.
+95% confidence interval: This interval suggests that we are 95% confident that the true difference in means lies between these two values.
+
+Since our p-value is less than 0.05, we can reject the null hypothesis that there is no relationship between gdp and schooling. Therefore, we have proved our alternative hypothesis, which is that there is a relationship between gdp and schooling.
+
+
 
 #visualzing GDP vs schooling model    
 ```{r }
