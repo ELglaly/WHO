@@ -66,6 +66,11 @@ total_expenditure: The model Shows that for each unit increase in total expendit
 2- Multiple R-squared: 0.5449 This means that the model explains 54.49% of the variance in life expectency, wich is not very high
 
 
+#R- Squared
+
+the model shows that Multiple R-squared = 0.5449 which means the variance in the life_expectancy that is explained by the independent variables (gdp, total_expenditure....) is  54.49% of the variability in life expectancy can be explained by the model. and Adjusted R-squaredis different from Multiple R-squared because the model have more than one predictor and Adjusted R-squared of 54.38% indicates that after accounting for the number of predictors, the model still explains about 54.38% of the variance in life expectancy which is less than Multiple R-squared which means the model includes unnecessary predictors.
+
+
 # Multicollinearity for the multi_model_gdp_status model
 
 ```{r}
@@ -83,22 +88,34 @@ cor( WHO[,c("gdp", "total_expenditure", "status_numeric")])
 #cor.test(WHO$gdp,WHO$schooling)
 
 ```
-1- Form the corelation matrix above we can see that GDP and schooling is corelated as cor estmite equals 0.4679470 so We will remove the of them but base on the cor estimate between total_expenditure and GDP is less than schooling and total_expenditure we will reomve schooling from the model.
+1- From the correlation matrix above, we can see that GDP and schooling are correlated, with a correlation estimate of 0.4679470. Therefore, we will remove one of them. Based on the correlation estimate, the relationship between total expenditure and GDP is less than that of schooling and total expenditure, so we will remove schooling from the model.
 
-2-similartiy, for the status we can see that GDP and status is corelated as cor estmates equals 0.4848010 so we will reomve status_numericfrom the model
+2- Similarly, for the status variable, we can see that GDP and status are correlated, with a correlation estimate of 0.4848010. Therefore, we will remove status_numeric from the model.
 
 #multi_model_gdp_status after removing corelated factors
 
 ```{r}
-
+# creating the model after removing corelated predictors
 multi_model_gdp_status <- lm(life_expectancy ~ gdp + total_expenditure , data = WHO)
 summary(multi_model_gdp_status)
 ```
-what we can see that the Multiple R-squared: 0.2041 which was 0.5449 before removing removing corelated factors which means that the model explains 20.41% of the variance in life expectency, wich is not very high.
+#coeffectient
+
+**Intercept**: The model predicts that when all variables (GDP and total expenditure) are zero, life expectancy equals 6.525e+01  years. The p-value is less than 5%, which indicates that this estimate is statistically significant.
+
+**GDP**: The model shows that for each unit increase in GDP, life expectancy increases by 3.247e-04 years, holding all other factors constant. The p-value is less than 5%, indicating a statistically significant relationship between GDP and life expectancy, allowing us to reject the null hypothesis.
+
+**Total Expenditure**: The model indicates that for each unit increase in total expenditure, life expectancy increases by 3.761e-01 years, holding all other factors constant. The p-value of 1.16e-05 is less than 5%, which means that this estimate is statistically significant, allowing us to reject the null hypothesis.
+
+#R-Squared
+
+1- The model shows that the Multiple R-squared is 0.2041 which means that the variance in life expectancy explained by the independent variables (GDP and total expenditure) is 20.41%. which is not a big number. The Adjusted R-squared of 0.2031 is slightly lower, indicating that after accounting for the number of predictors, the model explains about 20.31% of the variance in life expectancy. 
 
 # Interactions Between  GDP and total_expenditure
 
 ```{r}
+
+# Call interaction_model_GDP_total_expenditure function
 interaction_model_GDP_total_expenditure <- lm(WHO$life_expectancy ~ WHO$total_expenditure * WHO$gdp)
 summary(interaction_model_GDP_total_expenditure)
 
@@ -107,10 +124,10 @@ summary(interaction_model_GDP_total_expenditure)
 
 1- (**Intercept**): The model predicts that when all variables GDP, and total expenditure are zero  , life expectancy equals 6.435e+01 years. and for **intercept** The p-value is less than 5% , which indicates that this estimate is statistically significant.
 
-2- GDP: The model shows that for each unit increase in GDP, life expectancy increases by5.230e-01 years, holding all other factors constant. The  p-value less than 5% indicates a statistically significant relationship between GDP and life expectancy and we can reject null hypothesis.
+2- **GDP**: The model shows that for each unit increase in GDP, life expectancy increases by5.230e-01 years, holding all other factors constant. The  p-value less than 5% indicates a statistically significant relationship between GDP and life expectancy and we can reject null hypothesis.
 
 
-WHO$total_expenditure:WHO$gdp : The model shows that the effect of gdp on the life expectency changes by -1.795e-05 when total_expenditure increases by one unit. the p-values indictes that relationship between GDP and life expectancy  varies depending on the level of total expenditure.
+**WHO$total_expenditure:WHO$gdp** : The model shows that the effect of gdp on the life expectency changes by -1.795e-05 when total_expenditure increases by one unit. the p-values indictes that relationship between GDP and life expectancy  varies depending on the level of total expenditure.
 
 
 # Visualizing the Interaction
@@ -120,15 +137,21 @@ ggplot(WHO, aes(x = gdp, y = life_expectancy, color = cut(total_expenditure, 5))
   geom_point() +
   geom_smooth(method = "lm", se = FALSE)
 ```
+
+The graph shows that the the effect of gdp on the life expectency really depends on the total expendiure value 
+
+
+
 # Visualizing the Interaction based on the value of  total total_expenditure
 ```{r}
 
+# Create a new variable 'expenditure_group' by cutting 'total_expenditure' into 5 groups
 WHO$expenditure_group <- cut(WHO$total_expenditure, 5)
 
 ggplot(WHO, aes(x = gdp, y = life_expectancy, color = expenditure_group)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE)+
-  facet_wrap(~ expenditure_group)
+  facet_wrap(~ expenditure_group) # create separate panels for each level of 'expenditure_group' 
 ```
 
 
@@ -139,7 +162,7 @@ ggplot(WHO, aes(x = gdp, y = life_expectancy, color = expenditure_group)) +
 ggplot(WHO, aes(x = gdp, y = life_expectancy, color = expenditure_group)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE) +
-  facet_wrap(~ status + expenditure_group)
+  facet_wrap(~ status + expenditure_group) # Create separate panels for each level of 'expenditure_group' and the country status
 ```
 
 # confedence interval for for coefficient the multi_model_gdp_status Model
@@ -150,13 +173,14 @@ ggplot(WHO, aes(x = gdp, y = life_expectancy, color = expenditure_group)) +
 
 ```
 
-1- We can see that the confidence interval for the **intercept** ranges from 6.420144e+01 6.630828e+01. This means that we can be 95% confident that the true value of the intercept lies within this range.
+1- We can see that the confidence interval for the intercept ranges from 6.420144e+01 to 6.630828e+01. This means that we can be 95% confident that the true value of the intercept lies within this range.
 
-2- Similarly, the confidence interval for gdp is between 2.910889e-04 3.583137e-04, indicating that we can be 95% confident that the true effect of gdp on life expectency falls within this interval.
+2- Similarly, the confidence interval for GDP is between 2.910889e-04 and 3.583137e-04, indicating that we can be 95% confident that the true effect of GDP on life expectancy falls within this interval.
 
-3- according to total_expenditure, the confidence interval for total_expenditure is between 2.083665e-01 5.438757e-01, indicating that we can be 95% confident that the true effect of total_expenditure on life expectency falls within this interval.
+3- According to total expenditure, the confidence interval for total expenditure is between 2.083665e-01 and 5.438757e-01, indicating that we can be 95% confident that the true effect of total expenditure on life expectancy falls within this interval.
 
-Since the confidence intervals for both the intercept and GDP and total_expenditure do not include zero, we can reject the null hypothesis. which suggests that there is a statistically significant relationship between (gdp , total_expenditure) and life expectency.
+Since the confidence intervals for the intercept, GDP, and total expenditure do not include zero, we can reject the null hypothesis, which suggests that there is a statistically significant relationship between GDP, total expenditure, and life expectancy.
+
 
 # visualizing confedence interval for for coefficient the multi_model_gdp_status Model
 
@@ -171,7 +195,8 @@ visualize_coefficient_CI <- function(function_model) {
 
   ggplot(df_coefficient, aes(x = coefficient, y = estimate)) +  
     geom_point(size = 2) +
-    geom_errorbar(aes(ymin = `2.5 %`, ymax = `97.5 %`), width = 0.2) +
+   geom_errorbar(aes(ymin = `2.5 %`, ymax = `97.5 %`), width = 0.2) +
+
     labs(title = "Coefficients and Their Confidence Intervals", 
          x = "Coefficient", 
          y = "Estimate")
@@ -244,7 +269,7 @@ visualize_confidence_interval_multiple <- function(function_model, dependent_nam
 
   }
   
-  # Predict with confidence intervals
+  # Predict with confidence interval
   CI_95 <- predict(function_model, newdata = new_data, interval = "confidence", level = 0.95)
   
   new_data$fit <- CI_95[, "fit"]
@@ -258,7 +283,7 @@ visualize_confidence_interval_multiple <- function(function_model, dependent_nam
     geom_line(color = "red") + 
     geom_ribbon(aes(ymin = down, ymax = up), alpha = 0.3, fill = "green") + 
     theme_minimal() +
-    labs(title = paste("95% Confidence Interval for ", independent_names, " vs ", dependent_name),
+    labs(title = paste("95% confidence Interval for ", independent_names, " vs ", dependent_name),
          x = independent_names,
          y = dependent_name) 
 }
@@ -268,5 +293,49 @@ visualize_confidence_interval_multiple(multi_model_gdp_status, "life_expectancy"
                                         "GDP & total Expenditure ")
 
 ```
+#Effect size
 
+``` {r}
+library(effectsize)
+library(afex)
+library(lme4)
+library(Matrix)# lme4 package and Matrix
+
+
+# https://stats.stackexchange.com/questions/266003/interpretation-of-cohens-f2-for-effect-size-in-multiple-regression
+
+
+# Fit the multiple linear regression model with both predictors
+multi_model_gdp_status <- lm(life_expectancy ~ gdp + total_expenditure, data = WHO)
+
+
+# Get R-squared values for the model
+r_squared_all <- summary(multi_model_gdp_status)$r.squared
+
+# Fit models for individual predictors
+model_test_total_expenditure <- lm(life_expectancy ~ total_expenditure, data = WHO)
+
+# Get R-squared values for the model
+r_squared_mod_total_expenditure <- summary(model_test_total_expenditure)$r.squared
+
+model_test_gdp <- lm(life_expectancy ~ gdp, data = WHO)
+# Get R-squared values for the model
+r_squared_mod_gdp <- summary(model_test_gdp)$r.squared
+
+# Calculate Cohen's f^2 for the predictors
+cohens_f_gdp <- (r_squared_all - r_squared_mod_gdp) / (1 - r_squared_all)
+cohens_f_total_expenditure <- (r_squared_all - r_squared_mod_total_expenditure) / (1 - r_squared_all)
+
+# Print results
+#Cohen's f for GDP:
+cohens_f_gdp
+#Cohen's f^2 for Total Expenditure
+
+cohens_f_total_expenditure
+
+
+cohens_f(multi_model_gdp_status) # Using afex package
+
+
+```
 
