@@ -35,7 +35,7 @@ class
 names(WHO)
 ```
 
-##  Does the country’s GDP, Schooling, status or Total expenditure affect life expectancy?
+##  Does the country’s GDP, Schooling or Total expenditure affect life expectancy?
 ```{r}
 #check the class of the status column
 class(WHO$status)
@@ -78,20 +78,13 @@ the model shows that Multiple R-squared = 0.5449 which means the variance in the
 
 ```{r}
 
-
-# add status_numeric as anew cloumns becuase cor function use only numerical data
-WHO$status_numeric <- ifelse(WHO$status == "Developed", 1, 0)
-class(WHO$status_numeric)
-
-
 # show the corelation in the model
-cor( WHO[,c("gdp" ,"schooling" , "total_expenditure", "status_numeric")])
+cor( WHO[,c("gdp" ,"schooling" , "total_expenditure")])
 
 
 ```
 1- From the correlation matrix above, we can see that GDP and schooling are correlated, with a correlation estimate of 0.4679470. Therefore, we will remove one of them. Based on the correlation estimate, the relationship between total expenditure and GDP is less than that of schooling and total expenditure, so we will remove schooling from the model.
 
-2- Similarly, for the status variable, we can see that GDP and status are correlated, with a correlation estimate of 0.4848010. Therefore, we will remove status_numeric from the model.
 
 #multi_model_gdp_status after removing corelated factors
 
@@ -130,6 +123,27 @@ summary(interaction_model_GDP_total_expenditure)
 
 
 **WHO$total_expenditure:WHO$gdp** : The model shows that the effect of gdp on the life expectency changes by -1.795e-05 when total_expenditure increases by one unit. the p-values indictes that relationship between GDP and life expectancy varies depending on the level of total expenditure.
+
+
+#Hypothesis Testing using ANOVA 
+
+```{r }
+#Null Hypothesis: GDP and Total Expenditure do not significantly affect life expectancy.
+#Alternative Hypothesis: At least one of GDP or Total Expenditure significantly affects life expectancy. 
+anova_result <- aov(life_expectancy ~ total_expenditure * gdp, data = WHO)
+# View the summary of the ANOVA results
+summary(anova_result)
+```
+
+#Explanation of hypothesis testing using ANOVA
+
+#Evaluating each factor
+total_expenditure: The F value of 63.45 indicates that total expenditure has a significant effect on life expectancy.
+The p-value (3.05e-15) is much less than 0.05, indicating that you can reject the null hypothesis for total expenditure. This means total expenditure significantly affects life expectancy.
+gdp: The F value of 360.79 suggests a very strong effect of GDP on life expectancy. The p-value (< 2e-16) is extremely small, leading to the rejection of the null hypothesis for GDP as well. This indicates that GDP significantly affects life expectancy.
+total expenditure:gdp: The F value of 9.18 indicates a significant interaction between total expenditure and GDP regarding their combined effect on life expectancy. The p-value (0.00248) is less than 0.01, suggesting that the interaction effect is statistically significant. This means that the effect of total expenditure on life expectancy is influenced by the level of GDP.
+
+Meaning: Both total expenditure and GDP have significant effects on life expectancy. There is a significant interaction effect between total expenditure and GDP, meaning that the impact of total expenditure on life expectancy varies depending on the level of GDP. These results all suggest that we can reject the null hypothesis that GDP and Total Expenditure do not significantly affect life expectancy.
 
 
 # Visualizing the Interaction
