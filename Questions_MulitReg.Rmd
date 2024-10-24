@@ -346,6 +346,48 @@ visualize_confidence_interval_multiple(multi_model_gdp_status, # passing model n
                                         "GDP & total Expenditure ") # # column names to be shown in the figure
 
 ```
+
+#Model Diagnostics
+```{r }
+#Q-Q plot
+qqnorm(resid(multi_model_gdp_status), main = "Q-Q Plot for Normality of Residuals")
+qqline(resid(multi_model_gdp_status), col = "red")
+#Residuals vs. Fitted
+plot(multi_model_gdp_status, which=1)
+#Scale-Location
+plot(multi_model_gdp_status, which=3)
+#Cook's Distance
+plot(multi_model_gdp_status, which=4)
+
+```
+
+#Analysis of Model Diagnostics
+
+Q-Q plot: The Q-Q plot shows that the residuals follow the red line fairly closely, representing a normal distribution, which is an assumption of linear regression.
+Residuals vs. Fitted: In the residuals vs. fitted plot, the red line is not flat, the red line is curved, which suggests that the relationship between the independent and dependent variables might not be well-captured by the model, meaning there could be non-linearity. 
+Scale-Location: The scale-location plot shows the red line is upward slanting and the residuals are clustered at one end of the plot and become more spread out as the plot moves along. The scale-location plot suggests heteroscedasticity because the red line is not flat but shows a distinct trend, indicating that the variance of the residuals is not constant across fitted values.
+Cook's Distance: None of the observations reach a Cook's distance of 1, so there are no significant observations that are influencing the model. However, it is important to note the spike of observations at around 800, because this data could be affecting the model because of the volume of observation numbers.#Model Diagnostics
+```{r }
+#Q-Q plot
+qqnorm(resid(multi_model_gdp_status), main = "Q-Q Plot for Normality of Residuals")
+qqline(resid(multi_model_gdp_status), col = "red")
+#Residuals vs. Fitted
+plot(multi_model_gdp_status, which=1)
+#Scale-Location
+plot(multi_model_gdp_status, which=3)
+#Cook's Distance
+plot(multi_model_gdp_status, which=4)
+
+```
+
+#Analysis of Model Diagnostics
+
+Q-Q plot: The Q-Q plot shows that the residuals follow the red line fairly closely, representing a normal distribution, which is an assumption of linear regression.
+Residuals vs. Fitted: In the residuals vs. fitted plot, the red line is not flat, the red line is curved, which suggests that the relationship between the independent and dependent variables might not be well-captured by the model, meaning there could be non-linearity. 
+Scale-Location: The scale-location plot shows the red line is upward slanting and the residuals are clustered at one end of the plot and become more spread out as the plot moves along. The scale-location plot suggests heteroscedasticity because the red line is not flat but shows a distinct trend, indicating that the variance of the residuals is not constant across fitted values.
+Cook's Distance: None of the observations reach a Cook's distance of 1, so there are no significant observations that are influencing the model. However, it is important to note the spike of observations at around 800, because this data could be affecting the model because of the volume of observation numbers.
+
+
 #Effect size
 
 ``` {r}
