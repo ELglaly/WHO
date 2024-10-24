@@ -226,7 +226,8 @@ visualize_coefficient_CI(multi_model_gdp_status)
 
 1- Confidence Interval for **intercept**seems to be slightly small. This indicates that the intercept is not very precise estimated..
 
-Similarity, the Confidence Interval for GDP and total expentiture are tiny. This indicates that the schooling is precise estimated.
+Similarity, the Confidence Interval for GDP and total expentiture are tiny. This indicates that the 
+GDP is precise estimated.
 
 
 
@@ -366,7 +367,10 @@ plot(multi_model_gdp_status, which=4)
 Q-Q plot: The Q-Q plot shows that the residuals follow the red line fairly closely, representing a normal distribution, which is an assumption of linear regression.
 Residuals vs. Fitted: In the residuals vs. fitted plot, the red line is not flat, the red line is curved, which suggests that the relationship between the independent and dependent variables might not be well-captured by the model, meaning there could be non-linearity. 
 Scale-Location: The scale-location plot shows the red line is upward slanting and the residuals are clustered at one end of the plot and become more spread out as the plot moves along. The scale-location plot suggests heteroscedasticity because the red line is not flat but shows a distinct trend, indicating that the variance of the residuals is not constant across fitted values.
-Cook's Distance: None of the observations reach a Cook's distance of 1, so there are no significant observations that are influencing the model. However, it is important to note the spike of observations at around 800, because this data could be affecting the model because of the volume of observation numbers.#Model Diagnostics
+Cook's Distance: None of the observations reach a Cook's distance of 1, so there are no significant observations that are influencing the model. However, it is important to note the spike of observations at around 800, because this data could be affecting the model because of the volume of observation numbers.#Model Diagnostics.
+
+
+
 ```{r }
 #Q-Q plot
 qqnorm(resid(multi_model_gdp_status), main = "Q-Q Plot for Normality of Residuals")
@@ -422,15 +426,18 @@ cohens_f_gdp <- (r_squared_all - r_squared_mod_gdp) / (1 - r_squared_all)
 cohens_f_total_expenditure <- (r_squared_all - r_squared_mod_total_expenditure) / (1 - r_squared_all)
 
 # Print results
-#Cohen's f for GDP:
+#Cohen's f^2  for GDP:
 cohens_f_gdp
 #Cohen's f^2 for Total Expenditure
 
 cohens_f_total_expenditure
 
 
-cohens_f(multi_model_gdp_status) # Using afex package
+cohens_f(multi_model_gdp_status) # Using afex package to show Cohen's f
 
 
 ```
+
+For total_expenditure, Cohen's f^2 = 0.0117493, which indicates a small effect.
+For cohens_f^2 for gdp it equals 0.2181094, which falls in the medium to large effect range.
 
