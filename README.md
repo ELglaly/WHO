@@ -6,7 +6,7 @@
 
 ## Introduction
 
-For our Midterm Project, we were tasked with analyzing and applying data mining techniques to the dataset, “Life Expectancy (WHO)”, a statistical analysis of factors influencing life expectancy. The dataset, compiled by the World Health Organization, contains 2938 observations of 22 variables. We focused on cleaning the dataset, making the variable names more cohesive, and removing "NA" values using R's `na.omit` function.
+For our Project, we were tasked with analyzing and applying data mining techniques to the dataset, “Life Expectancy (WHO)”, a statistical analysis of factors influencing life expectancy. The dataset, compiled by the World Health Organization, contains 2938 observations of 22 variables. We focused on cleaning the dataset, making the variable names more cohesive, and removing "NA" values using R's `na.omit` function.
 
 To ensure efficient data analysis, we created several functions for:
 - Visualizing residual plots
